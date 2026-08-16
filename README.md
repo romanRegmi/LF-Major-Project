@@ -1,117 +1,92 @@
-# Machine Learning in the field of Medicine
+# 🏥 Machine Learning in Healthcare: Multi-Disease Prediction System
 
-An end-to-end project that can be useful in predicting health issues realted to heart, kidney, liver etc.
+An end-to-end Machine Learning pipeline and interactive web application to predict risk factors for major health conditions (Heart, Kidney, Liver, Diabetes, Breast Cancer, Pneumonia, and Malaria).
 
-## The data used is from kaggle.
+---
 
-### Tabular data
+## 📌 Features & Supported Datasets
+
+The models are trained using public datasets from Kaggle:
+
+### Tabular Data
+* 🫀 **Heart:** [Heart Disease UCI](https://www.kaggle.com/ronitf/heart-disease-uci)
+* 🩺 **Kidney:** [Chronic Kidney Disease](https://www.kaggle.com/mansoordaku/ckdisease)
+* 🧪 **Liver:** [Indian Liver Patient Records](https://www.kaggle.com/uciml/indian-liver-patient-records)
+* 🩸 **Diabetes:** [Pima Indians Diabetes Database](https://www.kaggle.com/uciml/pima-indians-diabetes-database)
+* 🎗️ **Breast Cancer:** [Wisconsin Breast Cancer Dataset](https://www.kaggle.com/uciml/breast-cancer-wisconsin-data)
+
+### Image Data
+* 🫁 **Pneumonia:** [Chest X-Ray Images](https://www.kaggle.com/paultimothymooney/chest-xray-pneumonia)
+* 🔬 **Malaria:** [Malaria Cell Images Dataset](https://www.kaggle.com/iarunava/cell-images-for-detecting-malaria)
+
+> 💡 **Note:** Detailed information on preprocessed attributes and dropped features after feature selection can be found in `aboutData.txt`.
+
+---
+
+## 🔄 Project Pipeline & Methodology
+
+### 1. Feature Engineering
+
+* **Data Rectification:** Handled non-logical values (e.g., zero-values in blood pressure or glucose readings) and fixed formatting issues (such as trailing tab characters in WBC counts).
   
-1. [Heart](https://www.kaggle.com/ronitf/heart-disease-uci): Heart Disease Dataset 
-2. [Kidney](https://www.kaggle.com/mansoordaku/ckdisease): Chronic Kidney Disease
-3. [Liver](https://www.kaggle.com/uciml/indian-liver-patient-records): Indian Patient Liver Records
-4. [Diabetes](https://www.kaggle.com/uciml/pima-indians-diabetes-database): Pima Indian Diabetes Dataset
-5. [Breast Cancer](https://www.kaggle.com/uciml/breast-cancer-wisconsin-data): Winconsin Breast Cancer Dataset
-### Image data
-1. [Pnemonia](https://www.kaggle.com/paultimothymooney/chest-xray-pneumonia): Chest X-Ray Images
-2. [Malaria](https://www.kaggle.com/iarunava/cell-images-for-detecting-malaria): Malaria Cell Images Dataset
+  ![Faulty Data Example](images/image/faulty_data.png)  
+  *Example of faulty zero-value readings in tabular data.*
 
-To know more about the data, see the aboutData.txt file. The file contains fetaures that were removed after the feature-selection part.
+  ![Typo Clean-up Example](images/image/typo.png)
 
-## Life Cycle of the Project
+* **Missing Value Imputation:** Missing fields were imputed using class-conditional medians (splitting by the target output class) to prevent data leakage from healthy vs. diseased distributions.
+* **Class Imbalance Handling:** Applied resampling techniques via `imbalanced-learn` on the training set (after `train_test_split`).
+* **Feature Encoding & Scaling:** 
+  * Categorical/binary features were mapped using numeric replacements.
+  * Standard scaling (`StandardScaler`) was applied for distance- and gradient-based models (Logistic Regression, K-NN). Tree-based ensembles (Random Forest) were left unscaled.
 
-A data science life cycle is an iterative set of data science steps you take to deliver a project or analysis. Because every data science project and team are different, every specific data science life cycle is different.
+![Encoding Example](images/image/encoding.png)
 
-### Feature Engineering 
+### 2. Feature Selection
+For high-dimensional datasets, features were pruned based on **Information Gain** to eliminate redundant predictors.
 
-Feature engineering refers to a process of selecting and transforming variables(using domain knowledge) when creating a predictive model using machine learning or statistical modeling (such as deep learning, decision trees, or regression). The process involves a combination of data analysis, applying rules of thumb, and judgement. You can read more about it [here](https://www.displayr.com/what-is-feature-engineering/).
+### 3. Model Training, Evaluation & MLOps
+* **Tabular Models:** Evaluated algorithms including Logistic Regression, K-NN, and Random Forest.
+* **Image Models:** Fine-tuned convolutional neural networks using **FastAI (ResNet)** architectures.
+* **Metric Selection:** Optimized specifically for **Recall** to minimize **False Negatives** (the critical cost of failing to identify a diseased patient).
+* **Tracking & Serialization:** Experiments were logged using `MLflow`, and finalized models were serialized with `pickle`.
 
-The following summarizes the feature engineering process used in this project.
-1. Data Retcification
+---
 
-Consider the following data-point from the diabetes dataset.
+## 🔍 Model Explainability (XAI)
 
-<img src = "images/image/faulty_data.png">
+In medical applications, black-box predictions are insufficient. To explain individual prediction drivers (e.g., determining whether glucose or insulin levels contributed more to a diabetic prediction), we integrated **Shapash**.
 
-The data for the feature **BloodPressure** shows a value of 0. This value is wrong as blood pressure does not drop to 0. The different datasets might have many similar inaccuracies that could not be rectified due to lack domain knowledge.
+![Shapash Feature Importance](images/image/shapash.png)
 
-Similarly, some datasets contained lots of typos on some of the features. For instance, in the kidney dataset, the feature ``white blood cell count(wc)`` had tab(\t) attached to the numbers. All of this was corrected seperately. 
+*(Currently implemented for Chronic Kidney Disease and Breast Cancer modules).*
 
-<img src = "images/image/typo.png">
+---
 
-2. Missing Values
+## 🛠️ Installation & Setup
 
-Some of the datasets had missing values for different features. To get over the problem, the data was split based on the outcome(dependent-variable) and the feature median was used inplace of the missing values.
+### Prerequisites
+* **OS:** macOS / Linux / Windows
+* **Python:** 3.9+
+* **Tools:** `pip`, `pipenv`, `git`
 
-The data was split because the median value of features for people with and without the disease is different. They cannot be taken together.
+### Quickstart
 
-3. Imbalanced Data
+1. **Clone the repository:**
+    ```bash
+    git clone [https://github.com/Roman251/LF-Major-Project.git](https://github.com/Roman251/LF-Major-Project.git)
+    cd LF-Major-Project
+    ```
 
-The datasets were mostly imbalanced where majority of the data showed that patients did not suffer from any disease. The ```imbalanced-learn``` library was used on the training set to balance-out the dataset after the ```train_test_split```.
+2. **Set up the virtual environment:**
+    ```bash
+    pip install --user pipenv
+    pipenv shell
+    pipenv install --skip-lock
+    ```
 
-4. Feature Encoding
-
-The categorical/nominal variables present were binary. Simple ```replace()``` function was used to turn them into numeric datatype.
-
-<img src = "images/image/encoding.png">
-
-5. Feature Scaling
-
-The features were scaled using the Standardization technique when training the model using the ```logistic-regression | k-neareast-neighbour``` algorithm. For the datasets trained using ```random-forest-classifier```, scaling was not done.
-
-### Feature Selection
-
-In datasets with large number of features, the ```information-gain``` algorithm was used to remove features with low priority. 
-
-### Model Selection & MLOps tool used
-
-Different algorithms were used to train the model. The performance-metrics used to evaluate the model were logged using the ```mlflow``` library. The model & hyperparameters with the best value for ```recall``` was selected. This is because, in the Health Domain, the cost associated with ```False Negative```(classifying sick patient as healthy) is high, and **recall** should be the model metric to use to select our best model when there is a high cost associated with False Negative.
-
-The image datasets were trained using the ```fastai-resnet``` algorithm. 
-
-Upon training the model, it was serialized as **pickle** files
-
-## Model Explainability
-When it comes to the Health-Domain, we would also need to know why we suffer from a disease(if we do suffer from it). For instance, a diabetic patient would need to know what contributes to him being diabetic. Is it because his **glucose-levels** are high or is it because his **insulin-levels** are off the chart? 
-
-To explain this, we can use the ```shapash``` library. The library will show us the contribution (values in range [0-1]) of each parameter in determinig if the patient is sick or healthy. 
-
-The following is a shapash plot that shows the contribution of each feature(Y-axis) for a patient with kidney disease.
-
-This was only implemented for kidney and cancer.
-
-<img src = "images/image/shapash.png" width=500 height=300>
-
-
-### Model Deployement Framework
-
-The ```streamlit``` framework was used to create the interface and develope the application so as to deploy it on the cloud.  
-
-## ⏳ Installation Requirements
-1. Operating system: macOS / OS X · Linux · Windows
-2. Python version: Python 3.9
-3. Package managers: ``pip`` | ```pipenv```
-
-## Installation Process
-Make sure your ```pip``` is up to date & install the pipenv packaging tool.
-
-```pip install --user pipenv```
-
-### On your terminal type the following command
-```
-git clone https://github.com/Roman251/LF-Major-Project.git
-
-pipenv shell
-pipenv install --skip-lock
-
-cd app
-streamlit run app.py
-```
-
-## Future Enhancements
-
-1. With the help from a domain expert, proper feature engineering can be done. 
-
-2. Upon prediction, based on the values of the features, a diet plan for the clients can be developed. 
-
-## Project Created By
-Roman Regmi
+3. **Launch the Streamlit App:**
+    ```bash
+    cd app
+    streamlit run app.py
+    ```
